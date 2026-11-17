@@ -136,12 +136,14 @@ function startZXing() {
   hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [ZXing.BarcodeFormat.EAN_13, ZXing.BarcodeFormat.CODE_128]);
   hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
   zxingReader = new ZXing.BrowserMultiFormatReader(hints);
-  zxingReader.decodeFromVideoElement($("video"), (res) => {
+  // decodeFromVideoElementContinuously escanea en bucle y entrega cada lectura al callback.
+  // (decodeFromVideoElement solo hace una lectura y devuelve una Promise, por eso no funcionaba.)
+  zxingReader.decodeFromVideoElementContinuously($("video"), (res, err) => {
     if (res) {
       const fmt = res.getBarcodeFormat() === ZXing.BarcodeFormat.EAN_13 ? "EAN-13" : "Code 128";
       onCode(res.getText(), fmt);
     }
-  });
+  }).catch(() => say("El lector de códigos falló. Escribe el código a mano.", "err"));
 }
 
 async function startCam() {
